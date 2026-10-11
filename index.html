@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#34457a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Fine Soil">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/svg+xml" href="favicon-dark.svg" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Fine Soil</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<style>
+:root{--bg:#eaf0ee;--card:#fbfcfa;--ink:#1c2a34;--mute:#5d6b73;--ac:#34457a;--acink:#fff;--gold:#c58f2a;--line:#d5dedb;--tile:#dbe4e1}
+@media(prefers-color-scheme:dark){:root{--bg:#121a20;--card:#1a242c;--ink:#e7eeee;--mute:#93a3a9;--ac:#8fa4e8;--acink:#101828;--gold:#e2b04f;--line:#2b3943;--tile:#26333c}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) calc(40px + env(safe-area-inset-bottom,0px)) env(safe-area-inset-left,0px);-webkit-text-size-adjust:100%}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;margin:0;line-height:1.15}
+header{max-width:760px;margin:0 auto;padding:22px 18px 8px}
+header h1{font-size:28px}
+nav{display:flex;gap:6px;margin-top:14px;overflow-x:auto}
+nav button{flex:1;min-width:84px;padding:9px 10px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;font:inherit;cursor:pointer}
+nav button[aria-current=true]{background:var(--ac);color:var(--acink);border-color:var(--ac)}
+main{max-width:760px;margin:0 auto;padding:10px 18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin:12px 0}
+.cong{border:2px solid var(--gold);background:var(--tile)}
+.big{font-family:Georgia,"Times New Roman",serif;font-size:clamp(34px,9vw,52px);font-weight:700;line-height:1.05;margin:6px 0 14px}
+.mute{color:var(--mute);font-size:14px}
+button,a{touch-action:manipulation}
+button.p,a.p{display:inline-block;background:var(--ac);color:var(--acink);border:0;border-radius:8px;padding:11px 18px;font:600 15px inherit;cursor:pointer;text-decoration:none}
+button.s,a.s{display:inline-block;background:none;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:9px 14px;font:inherit;cursor:pointer;text-decoration:none}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stats b{display:block;font:700 26px Georgia,"Times New Roman",serif}
+.bar{height:8px;background:var(--tile);border-radius:4px;overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:var(--gold)}
+textarea,select,input[type=text],input[type=number],input[type=date],input[type=time]{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+label{display:block;font-weight:600;margin:12px 0 4px}
+.chip{border:1px dashed var(--mute);background:none;color:var(--ink);border-radius:20px;padding:4px 12px;font:inherit;font-size:14px;cursor:pointer}
+.shelf{display:flex;align-items:flex-end;gap:3px;height:200px;padding:0 0 6px;border-bottom:6px solid var(--line);overflow-x:auto}
+.spine{flex:0 0 auto;width:14px;background:var(--tile);border-radius:3px 3px 0 0;position:relative;overflow:hidden}
+.spine i{position:absolute;left:0;right:0;bottom:0;background:var(--gold)}
+.spine.done i{background:var(--ac)}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.badge{border:1px solid var(--line);border-radius:10px;padding:12px;opacity:.5}
+.badge.on{opacity:1;border-color:var(--gold)}
+.chk{display:flex;gap:10px;align-items:center;padding:6px 0;font-weight:400;margin:0}
+.chk input{width:20px;height:20px;accent-color:var(--ac)}
+.rem{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;display:none;max-width:90%;z-index:9}
+ol{padding-left:20px}
+.mark{flex:0 0 auto}
+summary{cursor:pointer;font:600 18px Georgia,"Times New Roman",serif}
+pre{white-space:pre-wrap;font-size:12px;background:var(--bg);padding:10px;border-radius:8px}
+</style></head>
+<body>
+<header><div class="row"><svg class="mark" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><path d="M30 49V25" fill="none" stroke="var(--gold)" stroke-width="7" stroke-linecap="round"/><path d="M29 36C12 36 9 20 11 12C25 12 34 22 29 36Z" fill="var(--ac)"/><path d="M34 27C31 10 44 5 55 7C56 20 47 29 34 27Z" fill="var(--gold)"/></svg>
+<div style="flex:1"><h1>Fine Soil</h1><div class="mute">Read. Reflect. Grow.</div></div><span id="acct"></span></div>
+<nav id="nav"></nav></header>
+<main id="app"></main>
+<div id="toast" role="status"></div>
+<script>
+const B=[["Genesis",50],["Exodus",40],["Leviticus",27],["Numbers",36],["Deuteronomy",34],["Joshua",24],["Judges",21],["Ruth",4],["1 Samuel",31],["2 Samuel",24],["1 Kings",22],["2 Kings",25],["1 Chronicles",29],["2 Chronicles",36],["Ezra",10],["Nehemiah",13],["Esther",10],["Job",42],["Psalms",150],["Proverbs",31],["Ecclesiastes",12],["Song of Solomon",8],["Isaiah",66],["Jeremiah",52],["Lamentations",5],["Ezekiel",48],["Daniel",12],["Hosea",14],["Joel",3],["Amos",9],["Obadiah",1],["Jonah",4],["Micah",7],["Nahum",3],["Habakkuk",3],["Zephaniah",3],["Haggai",2],["Zechariah",14],["Malachi",4],["Matthew",28],["Mark",16],["Luke",24],["John",21],["Acts",28],["Romans",16],["1 Corinthians",16],["2 Corinthians",13],["Galatians",6],["Ephesians",6],["Philippians",4],["Colossians",4],["1 Thessalonians",5],["2 Thessalonians",3],["1 Timothy",6],["2 Timothy",4],["Titus",3],["Philemon",1],["Hebrews",13],["James",5],["1 Peter",5],["2 Peter",3],["1 John",5],["2 John",1],["3 John",1],["Jude",1],["Revelation",22]];
+const flat=[],first=[];let N=0;
+B.forEach(([n,c],b)=>{first[b]=N;for(let i=1;i<=c;i++){flat.push([b,n,i]);N++}});
+const pad=n=>String(n).padStart(2,'0');
+const iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse=s=>{const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const addD=(s,n)=>{const d=parse(s);d.setDate(d.getDate()+n);return iso(d)};
+const gap=(a,b)=>Math.round((parse(b)-parse(a))/864e5);
+const today=()=>iso(new Date());
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=s=>parse(s).toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'});
+const D={plan:{start:today(),idx:0},begin:today(),days:{},read:{},take:{},prep:{},ev:{},cal:'',rt:'07:00',pt:'19:00',rem:[],win:null,cong:null,shown:{},updated:0,stale:{},onb:0,evPlan:""};
+let S={...D};
+try{S={...D,...JSON.parse(localStorage.getItem('dbr2')||'{}')}}catch(e){}
+let db=null,user=null;
+function save(){
+  S.updated=Date.now();
+  try{localStorage.setItem('dbr2',JSON.stringify(S))}catch(e){}
+  if(db&&user){clearTimeout(save.t);save.t=setTimeout(()=>db.collection('users').doc(user.uid).set(JSON.parse(JSON.stringify(S))).catch(()=>toast('Cloud save failed. Check your Firestore rules.')),800)}
+}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',4000)}
+
+/* ---------- plan helpers ---------- */
+const planIdx=d=>gap(S.plan.start,d);
+const ciFor=d=>{const i=planIdx(d);return i<0?null:(S.plan.idx+i)%N};
+const readCount=()=>Object.keys(S.read).length;
+const bookDone=b=>{for(let i=0;i<B[b][1];i++)if(!S.read[first[b]+i])return false;return true};
+const rangeDone=(a,z)=>{for(let b=a;b<=z;b++)if(!bookDone(b))return false;return true};
+const nextDow=w=>{const d=parse(today());while(d.getDay()!==w)d.setDate(d.getDate()+1);return iso(d)};
+function streak(){
+  let d=today(),s=0,g=null;
+  if(!S.days[d])d=addD(d,-1);
+  while(d>=S.begin){
+    if(S.days[d])s++;
+    else if(g===null||gap(d,g)>=7)g=d;
+    else break;
+    d=addD(d,-1);
+  }
+  return s;
+}
+function jwCode(ci){const[b,,c]=flat[ci];return `${pad(b+1)}${String(c).padStart(3,'0')}001`}
+const jwWeb=ci=>`https://www.jw.org/finder?wtlocale=E&bible=${jwCode(ci)}`;
+function openJW(ci){
+  if(!/Android|iPhone|iPad/i.test(navigator.userAgent)){window.open(jwWeb(ci),'_blank','noopener');return}
+  let left=false;const h=()=>{if(document.hidden)left=true};
+  document.addEventListener('visibilitychange',h);
+  location.href='jwlibrary:///finder?bible='+jwCode(ci);
+  setTimeout(()=>{document.removeEventListener('visibilitychange',h);if(!left)location.href=jwWeb(ci)},1500);
+}
+
+/* ---------- celebrations ---------- */
+function monthCheck(){
+  const t=today(),d=parse(t),c=[];
+  const pv=new Date(d.getFullYear(),d.getMonth()-1,1);
+  c.push([pv.getFullYear(),pv.getMonth()]);
+  const last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();
+  if(d.getDate()===last&&S.days[t])c.push([d.getFullYear(),d.getMonth()]);
+  for(const[y,m]of c){
+    const key=`${y}-${pad(m+1)}`;if(S.shown[key])continue;
+    const n=new Date(y,m+1,0).getDate();let need=0,got=0;
+    for(let i=1;i<=n;i++){const ds=`${key}-${pad(i)}`;if(ds<S.begin||ds>t)continue;need++;if(S.days[ds])got++}
+    S.shown[key]=1;if(need<7)continue;
+    const name=new Date(y,m,1).toLocaleDateString(undefined,{month:'long',year:'numeric'});
+    if(got===need)S.cong={t:'Perfect month!',s:`You read every day in ${name}: ${got} of ${need}.`};
+    else if(need-got<=Math.floor(need/7))S.cong={t:'Steady month!',s:`You read ${got} of ${need} days in ${name}. That is faithful consistency.`};
+  }
+  save();
+}
+
+/* ---------- views ---------- */
+let tab='today';
+const tabs=[['today','Today'],['shelf','Bookshelf'],['meet','Meetings'],['rem','Reminders'],['set','Settings']];
+function render(){
+  document.getElementById('nav').innerHTML=tabs.map(([k,l])=>`<button ${tab===k?'aria-current="true"':''} onclick="tab='${k}';render()">${l}</button>`).join('');
+  document.getElementById('acct').innerHTML=db?(user?`<button class="s" onclick="tab='set';render()">${esc((user.displayName||'Account').split(' ')[0])}</button>`:`<button class="s" onclick="signIn()">Sign in</button>`):'';
+  document.getElementById('app').innerHTML={today:vToday,shelf:vShelf,meet:vMeet,rem:vRem,set:vSet}[tab]();
+}
+
+function vToday(){
+  if(!S.onb)return `<div class="card"><h2>Where are you starting?</h2><p class="mute">Pick the book and chapter you're reading first.${db?' A whole-day event for each day’s chapter will be added to your Google Calendar.':''}</p>${pickerHTML('ob','oc')}<div style="margin-top:14px"><button class="p" onclick="startFrom('ob','oc')">Start reading</button></div></div>`;
+  const t=today(),ci=ciFor(t);let h='';
+  if(S.cong)h+=`<div class="card cong"><h2>🎉 ${esc(S.cong.t)}</h2><p>${esc(S.cong.s)}</p><button class="s" onclick="S.cong=null;save();render()">Dismiss</button></div>`;
+  if(S.win&&t<S.win.until){
+    const nx=(S.win.book+1)%B.length,left=gap(t,S.win.until);
+    h+=`<div class="card"><h2>What will you read next?</h2><p class="mute">${left} day${left>1?'s':''} left to choose. If you don't, you'll carry on with ${esc(B[nx][0])}.</p>
+    <select id="nb" aria-label="Next book">${B.map(([n],i)=>`<option value="${i}" ${i===nx?'selected':''}>${i===nx?'Next in order: ':''}${esc(n)}</option>`).join('')}</select>
+    <div class="row" style="margin-top:10px"><button class="p" onclick="pickNext()">Start this book</button></div></div>`;
+  }
+  if(ci===null){h+=`<div class="card"><h2>Your plan starts ${fmt(S.plan.start)}</h2></div>`}
+  else{
+    const[,n,c]=flat[ci],done=!!S.days[t];
+    h+=`<div class="card"><div class="mute">Today, ${fmt(t)}</div><div class="big">${esc(n)} ${c}</div>
+    <div class="row"><button class="p" onclick="toggleRead('${t}')">${done?'✓ Read. Tap to undo':'Mark as read'}</button>
+    <button class="s" onclick="openJW(${ci})">Open in JW Library</button>
+    <a class="s" href="${jwWeb(ci)}" target="_blank" rel="noopener">jw.org</a></div>
+    <label for="tk">One thing that stood out</label>
+    <textarea id="tk" rows="2" placeholder="A sentence in your own words" oninput="S.take['${t}']=this.value;save()">${esc(S.take[t]||'')}</textarea></div>`;
+    const miss=[];for(let i=1;i<=7;i++){const ds=addD(t,-i);if(ds>=S.begin&&planIdx(ds)>=0&&!S.days[ds])miss.push(ds)}
+    if(miss.length)h+=`<div class="card"><h3>Catch up</h3><p class="mute">Tap a chapter once you've read it.</p><div class="row">${miss.map(ds=>`<button class="chip" onclick="toggleRead('${ds}')">${esc(flat[ciFor(ds)][1])} ${flat[ciFor(ds)][2]}</button>`).join('')}</div></div>`;
+  }
+  return h+`<div class="card"><div class="stats"><div><b>${streak()}</b><span class="mute">day streak</span></div>
+  <div><b>${readCount()}</b><span class="mute">of ${N} chapters</span></div>
+  <div><b>${N-readCount()}</b><span class="mute">to go</span></div></div>
+  <div class="bar"><i style="width:${readCount()/N*100}%"></i></div>
+  <p class="mute" style="margin:10px 0 0">One missed day per week won't break your streak.</p></div>`;
+}
+
+function toggleRead(date,quiet){
+  const ci=ciFor(date);if(ci===null)return;
+  const on=!S.days[date],b=flat[ci][0];
+  if(on){
+    const was=bookDone(b);
+    S.days[date]=ci;S.read[ci]=1;
+    if(!was&&bookDone(b)){
+      S.cong={t:`You finished ${B[b][0]}!`,s:'Well done. Take a moment, then choose what to read next. You have 3 days.'};
+      S.win={book:b,start:today(),until:addD(today(),3)};
+    }
+  }else{delete S.days[date];delete S.read[ci]}
+  monthCheck();save();render();if(quiet){S.stale[date]=1;save()}else pushDone(date,on);
+}
+
+function pickNext(){const b=+document.getElementById('nb').value;replan(first[b],S.days[today()]?addD(today(),1):today());toast('Plan updated')}
+function replan(ci,ds){
+  S.plan={start:ds,idx:ci};S.onb=1;if(S.begin>ds)S.begin=ds;S.win=null;save();render();
+  if(db)sync();else toast('Saved. Calendar and cloud sync aren’t set up in this copy of the app.');
+}
+
+function vShelf(){
+  const sp=B.map(([n,c],b)=>{let r=0;for(let i=0;i<c;i++)if(S.read[first[b]+i])r++;
+    return `<div class="spine ${r===c?'done':''}" style="height:${Math.max(22,Math.round(c/150*190)+22)}px" title="${esc(n)}: ${r}/${c}"><i style="height:${r/c*100}%"></i></div>`}).join('');
+  const bd=[['First five books',rangeDone(0,4)],['Psalms',bookDone(18)],['The Gospels',rangeDone(39,42)],['Hebrew Scriptures',rangeDone(0,38)],['Halfway there',readCount()>=Math.ceil(N/2)],['Whole Bible',readCount()>=N]];
+  return `<div class="card"><h2>Bookshelf</h2><p class="mute">Each spine is a book, as tall as it is long. It fills as you read, and finished books turn blue. Press a spine to see its name.</p><div class="shelf">${sp}</div></div>
+  <div class="card"><h3>Milestones</h3><div class="badges">${bd.map(([l,o])=>`<div class="badge ${o?'on':''}">${o?'🏅':'🔒'} ${l}</div>`).join('')}</div></div>`;
+}
+
+const MEET=[{k:'mid',name:'Midweek meeting',dow:3,prepDow:1,items:['Read this week’s material','Look up the scriptures','Write 1–2 comments in my own words','Choose a scripture I could read aloud']},
+{k:'wk',name:'Weekend meeting',dow:6,prepDow:4,items:['Study the article','Look up the cited scriptures','Write 1–2 comments in my own words','Think of a question to ask someone after']}];
+function vMeet(){
+  return MEET.map(m=>{
+    const d=nextDow(m.dow),p=S.prep[d]||{c:[],n:'',a:''};
+    return `<div class="card"><h2>${m.name}</h2><div class="mute">${fmt(d)}. Prepare by ${fmt(addD(d,m.prepDow-m.dow))}</div>
+    <div style="margin-top:10px">${m.items.map((it,i)=>`<label class="chk"><input type="checkbox" ${p.c[i]?'checked':''} onchange="prep('${d}','c',${i},this.checked)">${it}</label>`).join('')}</div>
+    <label for="n${m.k}">My comments</label><textarea id="n${m.k}" rows="3" oninput="prep('${d}','n',0,this.value)">${esc(p.n)}</textarea>
+    <label for="a${m.k}">What I'll apply this week</label><textarea id="a${m.k}" rows="2" oninput="prep('${d}','a',0,this.value)">${esc(p.a)}</textarea>
+    <p class="mute">Get the material from <a href="https://www.jw.org/en/" target="_blank" rel="noopener" style="color:var(--ac)">jw.org</a> or JW Library.</p></div>`}).join('');
+}
+function prep(d,f,i,v){const p=S.prep[d]||(S.prep[d]={c:[],n:'',a:''});if(f==='c')p.c[i]=v;else p[f]=v;save()}
+
+function vRem(){
+  const l=S.rem.slice().sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+  return `<div class="card"><h2>Reminders</h2><p class="mute">Pick a day and it goes on your Google Calendar.</p>
+  <label for="rtt">What to remember</label><input type="text" id="rtt" placeholder="Read Psalm 23 to someone">
+  <div class="row"><div style="flex:1"><label for="rd">Date</label><input type="date" id="rd" min="${today()}" value="${today()}"></div>
+  <div style="flex:1"><label for="rm">Time</label><input type="time" id="rm" value="${S.rt}"></div></div>
+  <div style="margin-top:14px"><button class="p" onclick="addRem()">Add reminder</button></div></div>
+  ${l.length?`<div class="card">${l.map(r=>`<div class="rem"><div><b>${esc(r.title)}</b><div class="mute">${fmt(r.date)}, ${r.time}${r.ev?' · on calendar':' · not on calendar yet'}</div></div><button class="s" onclick="delRem('${r.id}')">Delete</button></div>`).join('')}</div>`:''}`;
+}
+async function addRem(){
+  const title=document.getElementById('rtt').value.trim(),date=document.getElementById('rd').value,time=document.getElementById('rm').value||S.rt;
+  if(!title||!date)return toast('Add a title and a date.');
+  const r={id:Date.now().toString(36),title,date,time,ev:''};S.rem.push(r);save();render();
+  try{
+    await ensureCal();
+    const e=await api(`/calendars/${encodeURIComponent(S.cal)}/events`,{method:'POST',body:JSON.stringify({summary:'🔔 '+title,...slot(date,time,15),reminders:{useDefault:false,overrides:[{method:'popup',minutes:0}]}})});
+    if(e.id){r.ev=e.id;save();render();toast('Added to your calendar')}
+  }catch(e){toast('Saved here. '+(e.message||'Calendar not connected.').slice(0,120))}
+}
+async function delRem(id){
+  const r=S.rem.find(x=>x.id===id);if(!r)return;
+  S.rem=S.rem.filter(x=>x.id!==id);save();render();
+  if(r.ev&&S.cal)try{await api(`/calendars/${encodeURIComponent(S.cal)}/events/${r.ev}`,{method:'DELETE'})}catch(e){}
+}
+
+function pickerHTML(b,c){return `<div class="row"><div style="flex:2"><label for="${b}">Book</label><select id="${b}">${B.map(([n],i)=>`<option value="${i}">${esc(n)}</option>`).join('')}</select></div><div style="flex:1"><label for="${c}">Chapter</label><input type="number" id="${c}" min="1" value="1"></div></div>`}
+function startFrom(bid,cid){
+  const b=+document.getElementById(bid).value;
+  const c=Math.min(B[b][1],Math.max(1,parseInt(document.getElementById(cid).value)||1));
+  replan(first[b]+c-1,today());toast(`Starting at ${B[b][0]} ${c}`);
+}
+function vSet(){
+  const ios=/iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const instCard=standalone()?'':`<div class="card"><h2>Install Fine Soil</h2>${inst?'<p class="mute">Add it to your device so it opens like a normal app.</p><button class="p" onclick="inst.prompt()">Install</button>':ios?'<p>In Safari, tap the Share button, then “Add to Home Screen”.</p>':'<p class="mute">Use your browser menu: “Install app” or “Add to Home Screen”.</p>'}</div>`;
+  const acct=!db?`<p class="mute">Cloud sync isn’t set up in this copy of the app, so your progress stays on this device.</p>`:user?`<p>Signed in as ${esc(user.displayName||user.email)}. Your progress is saved to your account.</p><button class="s" onclick="signOut()">Sign out</button>`:`<p class="mute">Sign in to keep your progress on every device and to use Google Calendar.</p><button class="p" onclick="signIn()">Sign in with Google</button>`;
+  return instCard+`<div class="card"><h2>Account</h2>${acct}</div>
+  <div class="card"><h2>Where to start</h2><p class="mute">Today's reading becomes the chapter you pick. Your calendar updates by itself.</p>
+  ${pickerHTML('sb','sc')}<div style="margin-top:14px"><button class="p" onclick="startFrom('sb','sc')">Start from here</button></div></div>
+  <div class="card"><h2>Google Calendar</h2><p class="mute">${S.cal?'Connected. Events go in a calendar called “Daily Bible Reading”.':'Not connected yet. It connects when you choose where to start.'}</p>
+  <div class="row" style="margin-top:12px"><button class="p" onclick="sync()">Sync next 60 days</button><button class="s" onclick="rebuild()">Rebuild calendar</button></div>
+  <p class="mute" id="st-msg"></p>
+  <p class="mute">Each day's chapter is a whole-day event. Open the event and tap its “Tick it off” link, or tick it here, and the event gets a ✅. For a morning alert, look for “All-day event notifications” in Google Calendar's settings for the Daily Bible Reading calendar.</p></div>
+  <details class="card"><summary>Setting up this app (once, by whoever deploys it)</summary><ol class="mute">
+  <li>Create a Firebase project and turn on Authentication → Google.</li>
+  <li>Create a Firestore database with these rules:<pre>rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{uid} {
+      allow read, write: if request.auth != null
+                         && request.auth.uid == uid;
+    }
+  }
+}</pre></li>
+  <li>Deploy with Firebase Hosting. The app finds its settings automatically. On other hosts, paste the config into firebase-config.js.</li>
+  <li>In Google Cloud (same project), enable the Google Calendar API and add yourself as a test user.</li></ol></details>`;
+}
+
+/* ---------- Firebase ---------- */
+let tok=null,exp=0,inst=null;
+const standalone=()=>navigator.standalone||matchMedia('(display-mode: standalone)').matches;
+const useRedirect=()=>standalone()||/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();inst=e;render()});
+async function getCfg(){
+  if(window.FIREBASE_CONFIG)return window.FIREBASE_CONFIG;
+  try{const r=await fetch('/__/firebase/init.json');if(r.ok){const c=await r.json();if(c&&c.apiKey){localStorage.setItem('dbr-fb',JSON.stringify(c));return c}}}catch(e){}
+  try{return JSON.parse(localStorage.getItem('dbr-fb')||'null')}catch(e){return null}
+}
+let pendSync=false,ready=false;
+const runPend=()=>{if(pendSync&&ready&&user&&tok){pendSync=false;sync()}};
+async function initFB(){
+  const c=await getCfg();
+  if(!c||!window.firebase){deepLink();render();return}
+  try{
+    firebase.initializeApp(c);db=firebase.firestore();
+    firebase.auth().getRedirectResult().then(r=>{
+      if(r&&r.credential){
+        tok=r.credential.accessToken;exp=Date.now()+3500e3;
+        if(localStorage.getItem('dbr-pend')){localStorage.removeItem('dbr-pend');pendSync=true;toast('Signed in. Adding your readings to your calendar…');runPend()}
+        else toast('Signed in.');
+      }
+    }).catch(e=>toast('Sign-in failed: '+(e.code||e.message)));
+    firebase.auth().onAuthStateChanged(async u=>{user=u;if(u)await pull();ready=true;monthCheck();deepLink();render();runPend()});
+  }catch(e){db=null;deepLink()}
+  render();
+}
+function deepLink(){
+  const q=new URLSearchParams(location.search).get('read')||sessionStorage.getItem('dbr-read');
+  if(!q||!/^\d{4}-\d{2}-\d{2}$/.test(q))return;
+  history.replaceState(null,'',location.pathname);
+  if(db&&!user){sessionStorage.setItem('dbr-read',q);toast('Sign in to tick this chapter off.');return}
+  sessionStorage.removeItem('dbr-read');
+  if(ciFor(q)!==null&&!S.days[q]){toggleRead(q,true);toast('Marked as read ✓')}
+}
+async function pull(){
+  try{
+    const s=await db.collection('users').doc(user.uid).get();
+    if(s.exists&&(s.data().updated||0)>(S.updated||0)){S={...D,...s.data()};try{localStorage.setItem('dbr2',JSON.stringify(S))}catch(e){}}
+    else save();
+  }catch(e){toast('Cloud sync failed. Check your Firestore rules.')}
+}
+async function signIn(){
+  if(!db)return toast('Add your Firebase config in Settings first.');
+  try{
+    const p=new firebase.auth.GoogleAuthProvider();
+    p.addScope('https://www.googleapis.com/auth/calendar.app.created');
+    if(useRedirect()){await firebase.auth().signInWithRedirect(p);await new Promise(()=>{})}
+    const r=await firebase.auth().signInWithPopup(p);
+    tok=r.credential&&r.credential.accessToken;exp=Date.now()+3500e3;
+  }catch(e){toast('Sign-in failed: '+(e.code||e.message))}
+}
+async function signOut(){await firebase.auth().signOut();tok=null;render()}
+
+/* ---------- Google Calendar ---------- */
+async function auth(){
+  if(tok&&exp>Date.now())return tok;
+  if(useRedirect())localStorage.setItem('dbr-pend','1');
+  await signIn();
+  if(!tok)throw new Error('Calendar sign-in was not completed.');
+  return tok;
+}
+async function api(path,opt={}){
+  const t=await auth();
+  const r=await fetch('https://www.googleapis.com/calendar/v3'+path,{...opt,headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'}});
+  if(r.status===404||r.status===410)return {gone:true};
+  if(!r.ok)throw new Error(await r.text());
+  return r.status===204?{}:r.json();
+}
+const msg=t=>{const e=document.getElementById('st-msg');if(e)e.textContent=t};
+const tz=Intl.DateTimeFormat().resolvedOptions().timeZone;
+function endTime(t,m){const[h,mi]=t.split(':').map(Number);const x=Math.min(h*60+mi+m,1439);return `${pad(Math.floor(x/60))}:${pad(x%60)}`}
+const slot=(d,t,m)=>({start:{dateTime:`${d}T${t}:00`,timeZone:tz},end:{dateTime:`${d}T${endTime(t,m)}:00`,timeZone:tz}});
+const POP={reminders:{useDefault:false,overrides:[{method:'popup',minutes:0}]}};
+async function ensureCal(){
+  if(S.cal)return;
+  const c=await api('/calendars',{method:'POST',body:JSON.stringify({summary:'Daily Bible Reading',timeZone:tz})});
+  S.cal=c.id;save();
+}
+const rTitle=d=>{const ci=ciFor(d);return `${S.days[d]!==undefined?'✅':'📖'} Read ${flat[ci][1]} ${flat[ci][2]}`};
+
+async function sync(){
+  try{
+    msg('Signing in…');await auth();
+    const pk=S.plan.start+':'+S.plan.idx;
+    if(S.evPlan!==pk){if(S.cal&&Object.keys(S.ev).length)await clearFuture(S.plan.start);S.evPlan=pk;save()}
+    await ensureCal();
+    const base=`/calendars/${encodeURIComponent(S.cal)}/events`,items=[],t0=today(),link=location.origin+location.pathname;
+    const day=d=>({start:{date:d},end:{date:addD(d,1)},transparency:'transparent'});
+    for(let i=0;i<60;i++){
+      const date=addD(t0,i),dow=parse(date).getDay(),ci=ciFor(date);
+      if(ci!==null)items.push({key:'r:'+date,body:{summary:rTitle(date),description:`Tick it off: ${link}?read=${date}\nJW Library: jwlibrary:///finder?bible=${jwCode(ci)}\nWeb: ${jwWeb(ci)}`,...day(date)}});
+      const m=MEET.find(x=>x.prepDow===dow);
+      if(m)items.push({key:'p:'+date,body:{summary:`📝 Prepare for ${m.name.toLowerCase()}`,description:m.items.join('\n'),...day(date)}});
+      if(S.win&&date>=S.win.start&&date<S.win.until)items.push({key:'w:'+date,body:{summary:'📚 Choose your next book',...day(date)}});
+    }
+    const todo=items.filter(x=>!S.ev[x.key]);let n=0;
+    for(const x of todo){
+      const e=await api(base,{method:'POST',body:JSON.stringify(x.body)});
+      if(e.id){S.ev[x.key]=e.id;save()}
+      n++;msg(`Adding events… ${n}/${todo.length}`);
+      await new Promise(r=>setTimeout(r,120));
+    }
+    for(const d of Object.keys(S.stale||{})){
+      const id=S.ev['r:'+d];
+      if(id&&ciFor(d)!==null)await api(`${base}/${id}`,{method:'PATCH',body:JSON.stringify({summary:rTitle(d)})});
+      delete S.stale[d];
+    }
+    save();msg(`Done. ${n} new events added.`);render();toast('Calendar updated');
+  }catch(e){msg('Sync failed: '+(e.message||e).slice(0,200));toast('Calendar sync failed. Open Settings to retry.')}
+}
+async function clearFuture(ds){
+  for(const k of Object.keys(S.ev)){
+    if((k[0]==='r'||k[0]==='w')&&k.slice(2)>=ds){
+      await api(`/calendars/${encodeURIComponent(S.cal)}/events/${S.ev[k]}`,{method:'DELETE'});
+      delete S.ev[k];
+    }
+  }
+  save();
+}
+async function rebuild(){
+  if(!confirm('This deletes the “Daily Bible Reading” calendar and creates it again. Continue?'))return;
+  try{
+    if(S.cal)await api('/calendars/'+encodeURIComponent(S.cal),{method:'DELETE'});
+    S.cal='';S.ev={};S.rem.forEach(r=>r.ev='');save();await sync();
+  }catch(e){msg('Rebuild failed: '+(e.message||e).slice(0,200))}
+}
+async function pushDone(date,on){
+  const id=S.ev['r:'+date];if(!id||!S.cal)return;
+  try{await api(`/calendars/${encodeURIComponent(S.cal)}/events/${id}`,{method:'PATCH',body:JSON.stringify({summary:rTitle(date)})})}
+  catch(e){S.stale[date]=1;save();toast('Saved here. Your calendar will update next time you sync.')}
+}
+
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+initFB();monthCheck();render();
+</script>
+</body></html>
