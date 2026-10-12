@@ -6,7 +6,7 @@
 
 window.FIREBASE_CONFIG = {
   apiKey: "YOUR_API_KEY",
-  authDomain: "fine-soil.vercel.app",
+  authDomain: "fine-soil-app.vercel.app",
   projectId: "fine-soil-app",
   appId: "1:275304840914:web:1875b484b4b6b8e7e9b70b"
 };
