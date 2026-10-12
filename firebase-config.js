@@ -3,5 +3,12 @@
 //
 // Otherwise: Firebase console -> Project settings -> Your apps -> copy the config,
 // delete the two slashes at the start of the line below, and paste your values in.
-window.FIREBASE_CONFIG = null;
+
+window.FIREBASE_CONFIG = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "fine-soil.vercel.app",
+  projectId: "fine-soil-app",
+  appId: "1:275304840914:web:1875b484b4b6b8e7e9b70b"
+};
+
 // window.FIREBASE_CONFIG = { apiKey: "…", authDomain: "…", projectId: "…", appId: "…" };
