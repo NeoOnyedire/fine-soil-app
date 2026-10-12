@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/__/auth/:path*",
-      "destination": "https://YOUR_PROJECT_ID.firebaseapp.com/__/auth/:path*"
+      "destination": "https://fine-soil-app.firebaseapp.com/__/auth/:path*"
     }
   ]
 }
