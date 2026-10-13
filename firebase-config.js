@@ -5,7 +5,7 @@
 // delete the two slashes at the start of the line below, and paste your values in.
 
 window.FIREBASE_CONFIG = {
-  apiKey: "YOUR_API_KEY",
+  apiKey: "AIzaSyAKTwF-U1CKK298vQ9e-EoPhix8jKQV9YM",
   authDomain: "fine-soil-app.vercel.app",
   projectId: "fine-soil-app",
   appId: "1:275304840914:web:1875b484b4b6b8e7e9b70b"
